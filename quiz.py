@@ -69,13 +69,14 @@ def main():
 
   args = parser.parse_args()
 
-  num_questions = get_num_questions()
-
   questions = open_input_file_and_strip_headers(args.question_file)
   my_question_dict = build_question_dicts(questions)
   if not my_question_dict:
     print("Failed to generate quesiton dict; exiting...")
     sys.exit(1)
+  # Only prompt for input only if dictionary available
+  num_questions = get_num_questions()
+
   print generate_questions(my_question_dict, num_questions)
 
 if __name__ == '__main__':
