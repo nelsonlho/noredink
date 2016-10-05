@@ -1,6 +1,7 @@
 from collections import defaultdict
 import argparse
 import csv
+import random
 
 def open_input_file_and_strip_headers(file_path):
   result = []  # store in memory, not most efficient but we don't repeat code
@@ -28,14 +29,37 @@ def get_num_questions():
 def build_question_dicts(question_rows):
   question_dict = defaultdict(lambda: defaultdict(list))
   for row in question_rows:
-    strand_id = row[0]
+    _strand_id = row[0]  # unused
     strand_name = row[1]
-    standard_id = row[2]
+    _standard_id = row[2] # unused
     standard_name = row[3]
     question_id = row[4]
     difficulty = row[5]
     # we store in a hash map of a hash map with tuples of (question_id, difficulty)
     question_dict[strand_name][standard_name].append((question_id, difficulty))
+  return question_dict
+
+
+def generate_questions(question_dict, question_cnt, usage=None):
+  # TODO: incorporate usage
+  result = []
+  q_cnt = 0
+  # such that we do not always give the same strand a 'higher priority' when the question no.
+  # is low.
+  keys = question_dict.keys()
+  random.shuffle(keys)
+  while q_cnt < question_cnt:
+    # with the constraint of time, we randomly pick a strand and over which a question question
+    # random. lib should provide good long-term distribution on a per-standard and per-strand
+    #  basis here.
+    strand = keys[q_cnt % len(keys)]
+    standards = question_dict[strand]
+    standard_key = random.choice(standards.keys())
+    standard = standards[standard_key]
+    question_difficulty_tup = random.choice(standard)
+    result.append(question_difficulty_tup[0])
+    q_cnt += 1
+  return result
 
 
 def main():
@@ -48,8 +72,8 @@ def main():
   num_questions = get_num_questions()
 
   questions = open_input_file_and_strip_headers(args.question_file)
-  for q in questions:
-    print q
+  my_question_dict = build_question_dicts(questions)
+  print  generate_questions(my_question_dict, num_questions)
 
 if __name__ == '__main__':
   main()
